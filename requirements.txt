@@ -1,0 +1,8 @@
+ultralytics >= "8.0.106"
+schema >= "0.7.5"
+requests >= "2.31.0"
+loguru >= "0.7.0"
+-f https://download.pytorch.org/whl/cpu
+torch
+torchvision
+torchaudio

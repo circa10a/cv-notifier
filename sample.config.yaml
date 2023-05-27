@@ -1,0 +1,20 @@
+config:
+  source: 'rtsp://$STREAM_USER:$STREAM_PASSWORD@10.0.0.1/stream1'
+  schedule:
+    startTime: '07:00'
+    endTime: '18:00'
+  webhooks:
+    - url: http://localhost:8080
+      notifyInterval: 900
+      objects:
+        - bird
+        - cat
+        - dog
+      method: 'POST'
+      headers:
+        Content-Type: application/json
+        Authorization: Bearer $API_TOKEN
+      body: >
+        {
+          "someKey": "$object_name detected with confidence score of $object_confidence"
+        }
