@@ -9,6 +9,7 @@ Easily detect objects using computer vision ([YOLOv8](https://github.com/ultraly
 
 * [About](#about)
 * [Usage](#usage)
+  * [System requirements](#system-requirements)
   * [Local](#local)
   * [Docker](#docker)
 * [Configuration](#configuration)
@@ -48,6 +49,15 @@ config:
           "someKey": "$object_name detected with confidence score of $object_confidence"
         }
 ```
+
+### System requirements
+
+* x86
+  * 2 CPU's
+  * 500M available RAM
+* ARM (Raspberry Pi 4 recommended)
+  * 3 CPU's
+  * 500M available RAM
 
 ### Local
 
