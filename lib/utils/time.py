@@ -25,9 +25,9 @@ def parse_schedule_times(config: dict) -> tuple:
     '''
 
     # Determine if we need to run on a schedule or not
-    start_time = None
     schedule = config.get('schedule', {})
 
+    start_time = None
     if schedule.get('startTime'):
         start_time = parse(config['schedule']['startTime'])
 

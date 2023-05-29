@@ -27,12 +27,12 @@ def main():
     log.remove()
     log.add(stdout, level=configuration['loglevel'].upper())
 
-    # Determine if we need to run on a schedule or not
-    start_time, end_time = time_utils.parse_schedule_times(configuration)
-    schedule_set = start_time and end_time
-
     # Start processing
     while True:
+        # Determine if we need to run on a schedule or not
+        start_time, end_time = time_utils.parse_schedule_times(configuration)
+        schedule_set = start_time and end_time
+
         if schedule_set and not time_utils.in_between(datetime.now(), start_time, end_time):
             model = None
             results = None
