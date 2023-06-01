@@ -26,6 +26,8 @@ def main():
     # Set up a logger based on configured log level
     log.remove()
     log.add(stdout, level=configuration['loglevel'].upper())
+    # Maintain state of whether we logged when detections will resume
+    logged_scheduling_message = False
 
     # Start processing
     while True:
@@ -36,10 +38,15 @@ def main():
         if schedule_set and not time_utils.in_between(datetime.now(), start_time, end_time):
             model = None
             results = None
-            log.info(f"Outside of scheduled hours. Skipping detections until {start_time.strftime('%I:%M %p')}")
-            sleep(60)
+            if not logged_scheduling_message:
+                log.info(f"Outside of scheduled hours. Skipping detections until {start_time.strftime('%I:%M %p')}")
+                # Prevent unnecessary logs
+                logged_scheduling_message = True
+                sleep(60)
 
         if (schedule_set and time_utils.in_between(datetime.now(), start_time, end_time)) or not schedule_set:
+            # Reset logger message
+            logged_scheduling_message = False
             log.info('Inside scheduled hours or scheduling is disabled. Detecting objects...')
 
             model = YOLO(configuration['model'])
