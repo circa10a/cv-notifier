@@ -75,7 +75,7 @@ def process(webhooks: List[Dict], object_name: str, object_confidence: str) -> N
             response = requests.request(**opts)
             # Request was successful, so we store last notified time
             WEBHOOKS_LAST_NOTIFIED[webhook_hash] = datetime.now()
-            log.info(f"Notified {webhook['url']} successfully")
+            log.success(f"Notified {webhook['url']} successfully")
             log.debug(f"{webhook['url']} response code: {response.status_code}, reason: {response.reason}")
         except Exception as e:
             log.error(e)
