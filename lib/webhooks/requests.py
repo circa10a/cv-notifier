@@ -71,12 +71,17 @@ def process(webhooks: List[Dict], object_name: str, object_confidence: str) -> N
 
         # Otherwise continue and notify
         try:
-            log.info(f"Notifying {webhook['url']}")
+            log.info(f"Object {object_name} detected with confidence of {object_confidence}. Notifying {webhook['url']}")
             response = requests.request(**opts)
+            # Raise an error in the event of a non 2XX response code
+            response.raise_for_status()
             # Request was successful, so we store last notified time
             WEBHOOKS_LAST_NOTIFIED[webhook_hash] = datetime.now()
             log.success(f"Notified {webhook['url']} successfully")
-            log.debug(f"{webhook['url']} response code: {response.status_code}, reason: {response.reason}")
+            log.debug(f"{webhook['url']} response code: {response.status_code}, body: {response.text}")
+        except requests.exceptions.HTTPError as e:
+            log.debug(f"{webhook['url']} response code: {response.status_code}, body: {response.text}")
+            log.error(f"{e}.{webhook['url']} response code: {response.status_code}, reason: {response.reason}")
         except Exception as e:
             log.error(e)
 

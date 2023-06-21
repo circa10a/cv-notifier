@@ -26,8 +26,11 @@ def main():
     # Set up a logger based on configured log level
     log.remove()
     log.add(stdout, level=configuration['loglevel'].upper())
+
     # Maintain state of whether we logged when detections will resume
     logged_scheduling_message = False
+    # Maintain results to keep from spawning zombie threads
+    results = None
 
     # Start processing
     while True:
@@ -36,8 +39,6 @@ def main():
         schedule_set = start_time and end_time
 
         if schedule_set and not time_utils.in_between(datetime.now(), start_time, end_time):
-            model = None
-            results = None
             if not logged_scheduling_message:
                 log.info(f"Outside of scheduled hours. Skipping detections until {start_time.strftime('%I:%M %p')}")
                 # Prevent unnecessary logs
@@ -50,10 +51,11 @@ def main():
             log.info('Inside scheduled hours or scheduling is disabled. Detecting objects...')
 
             model = YOLO(configuration['model'])
-            results = model.predict(source=configuration['source'],
-                                    conf=configuration['confidence'],
-                                    stream=True,
-                                    verbose=False)
+            # Only assign results if it hasn't been before (start of the program) so that we don't create any zombie threads (according to tini)
+            results = results or model.predict(source=configuration['source'],
+                                               conf=configuration['confidence'],
+                                               stream=True,
+                                               verbose=False)
 
             for result in results:
                 if result.boxes:
@@ -68,9 +70,6 @@ def main():
 
                 # If we're outside scheduled hours, let's break the loop which will then reset model and results
                 if schedule_set and not time_utils.in_between(datetime.now(), start_time, end_time):
-                    # Reset model/results if loop is broken due to scheduling to save memory
-                    model = None
-                    results = None
                     break
 
 
