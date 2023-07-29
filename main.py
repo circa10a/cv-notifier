@@ -29,8 +29,6 @@ def main():
 
     # Maintain state of whether we logged when detections will resume
     logged_scheduling_message = False
-    # Maintain results to keep from spawning zombie threads
-    results = None
 
     # Start processing
     while True:
@@ -51,11 +49,10 @@ def main():
             log.info('Inside scheduled hours or scheduling is disabled. Detecting objects...')
 
             model = YOLO(configuration['model'])
-            # Only assign results if it hasn't been before (start of the program) so that we don't create any zombie threads (according to tini)
-            results = results or model.predict(source=configuration['source'],
-                                               conf=configuration['confidence'],
-                                               stream=True,
-                                               verbose=False)
+            results = model.predict(source=configuration['source'],
+                                    conf=configuration['confidence'],
+                                    stream=True,
+                                    verbose=False)
 
             for result in results:
                 if result.boxes:
