@@ -4,7 +4,7 @@ WORKDIR $WORKDIR
 COPY . .
 ARG MODEL=yolov8s.pt
 RUN apt-get update && \
-    apt-get install -y curl libgl1-mesa-glx libglib2.0-0 libpython3-dev gnupg g++ tini && \
+    apt-get install -y curl libgl1-mesa-glx libglib2.0-0 libpython3-dev gnupg g++ && \
     apt-get upgrade -y && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/* && \
@@ -12,5 +12,4 @@ RUN apt-get update && \
     pip3 install -r requirements.txt && \
     curl -sL https://github.com/ultralytics/assets/releases/download/v0.0.0/$MODEL -o $MODEL
 
-ENTRYPOINT ["tini", "--"]
 CMD ["python", "main.py"]
