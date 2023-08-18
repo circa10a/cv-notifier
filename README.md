@@ -34,7 +34,7 @@ config:
     startTime: '07:00'
     endTime: '18:00'
   webhooks:
-    - url: http://localhost:8080
+    - url: http://localhost:8080?object_name=$object_name&object_confidence=$object_confidence
       notifyInterval: 900
       objects:
         - bird
@@ -117,11 +117,11 @@ services:
 | `config.webhooks[0].method`         | HTTP method to send in request                                       | `False`   | `POST`             |  ❌                            |
 | `config.webhooks[0].headers`        | Map of HTTP headers to send in request                               | `False`   | `None`             |  ✅                            |
 | `config.webhooks[0].body`           | HTTP body to send in request                                         | `False`   | `None`             |  ✅                            |
-
+| `config.webhooks[0].timeout`        | HTTP request timeout in seconds                                      | `False`   | `5`                |  ❌                            |
 
 ### Variable substituiton
 
-Configuration fields that often require sensitive data do support environment variable subsition in the form of `$variable` within the configuration values. The `body` field within a webhook configuration supports some additional data around the object detected. This information can be used to customize request payloads like the example mentioned above in [configuration](#configuration).
+Configuration fields that often require sensitive data do support environment variable subtsition in the form of `$variable` within the configuration values. The `url`, `body`, and `headers within a webhook configuration supports some additional data around the object detected. This information can be used to customize request payloads like the example mentioned above in [configuration](#configuration).
 
 * `object_name` - The name of the object detected that was specified in the `objects` list
 * `object_confidence` - The confidence score from the model of the object detected

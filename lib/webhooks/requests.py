@@ -24,16 +24,20 @@ def sanitize_webhook(webhook: Dict, template_strs: Dict) -> Dict:
     To:
     { Authorization: Bearer eyJ0e... }
     '''
+    # Ensure we don't overwrite the existing templates webhook str in memory
+    sanitized_webhook = {}
     sanitized_headers = {}
 
     for key, value in webhook['headers'].items():
         sanitized_headers[key] = Template(value).substitute(template_strs)
 
-    webhook['url'] = Template(webhook['url']).substitute(template_strs)
-    webhook['headers'] = sanitized_headers
-    webhook['body'] = Template(webhook['body']).substitute(template_strs)
+    sanitized_webhook['url'] = Template(webhook['url']).substitute(template_strs)
+    sanitized_webhook['method'] = Template(webhook['method']).substitute(template_strs)
+    sanitized_webhook['headers'] = sanitized_headers
+    sanitized_webhook['data'] = Template(webhook['body']).substitute(template_strs)
+    sanitized_webhook['timeout'] = webhook['timeout']
 
-    return webhook
+    return sanitized_webhook
 
 
 def process(webhooks: List[Dict], object_name: str, object_confidence: str) -> None:
@@ -51,16 +55,8 @@ def process(webhooks: List[Dict], object_name: str, object_confidence: str) -> N
         # Subsitute url, headers, body with object data, environment variables for secrets
         webhook = sanitize_webhook(webhook, template_strs)
         # Create opts to send request and hash to render an immutable ID to track last notification
-        opts = {
-            'url': webhook['url'],
-            'method': webhook['method'],
-            'headers': webhook['headers'],
-            'data': webhook['body'],
-            'timeout': webhook['timeout']
-        }
-
         # Get the webhook's ID and check when webhook was last notified
-        webhook_hash = dict_hash(opts)
+        webhook_hash = dict_hash(webhook)
         if webhook_hash in WEBHOOKS_LAST_NOTIFIED:
             time_since_last_notified = datetime.now() - WEBHOOKS_LAST_NOTIFIED[webhook_hash]
             # If notified within the last configured interval, in seconds, skip
@@ -72,7 +68,7 @@ def process(webhooks: List[Dict], object_name: str, object_confidence: str) -> N
         # Otherwise continue and notify
         try:
             log.info(f"Object {object_name} detected with confidence of {object_confidence}. Notifying {webhook['url']}")
-            response = requests.request(**opts)
+            response = requests.request(**webhook)
             # Raise an error in the event of a non 2XX response code
             response.raise_for_status()
             # Request was successful, so we store last notified time
