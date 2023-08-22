@@ -1,4 +1,4 @@
-FROM python
+FROM python:3.12
 ENV WORKDIR=/opt/cv-notifier
 WORKDIR $WORKDIR
 COPY . .

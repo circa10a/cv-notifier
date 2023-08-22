@@ -55,8 +55,8 @@ config:
 * x86
   * 2 CPU's
   * 500M available RAM
-* ARM (Raspberry Pi 4 recommended)
-  * 3 CPU's
+* ARM (Raspberry Pi 4+ recommended)
+  * 4 CPU's
   * 500M available RAM
 
 ### Local
