@@ -34,8 +34,10 @@ def sanitize_webhook(webhook: Dict, template_strs: Dict) -> Dict:
     sanitized_webhook['url'] = Template(webhook['url']).substitute(template_strs)
     sanitized_webhook['method'] = Template(webhook['method']).substitute(template_strs)
     sanitized_webhook['headers'] = sanitized_headers
-    sanitized_webhook['data'] = Template(webhook['body']).substitute(template_strs)
+    sanitized_webhook['body'] = Template(webhook['body']).substitute(template_strs)
     sanitized_webhook['timeout'] = webhook['timeout']
+    sanitized_webhook['notifyInterval'] = webhook['notifyInterval']
+    sanitized_webhook['objects'] = webhook['objects']
 
     return sanitized_webhook
 
@@ -55,6 +57,14 @@ def process(webhooks: List[Dict], object_name: str, object_confidence: str) -> N
         # Subsitute url, headers, body with object data, environment variables for secrets
         webhook = sanitize_webhook(webhook, template_strs)
         # Create opts to send request and hash to render an immutable ID to track last notification
+        # Opts for requests library
+        request_opts = {
+            'url': webhook['url'],
+            'method': webhook['method'],
+            'headers': webhook['headers'],
+            'data': webhook['body'],
+            'timeout': webhook['timeout']
+        }
         # Get the webhook's ID and check when webhook was last notified
         webhook_hash = dict_hash(webhook)
         if webhook_hash in WEBHOOKS_LAST_NOTIFIED:
@@ -68,7 +78,7 @@ def process(webhooks: List[Dict], object_name: str, object_confidence: str) -> N
         # Otherwise continue and notify
         try:
             log.info(f"Object {object_name} detected with confidence of {object_confidence}. Notifying {webhook['url']}")
-            response = requests.request(**webhook)
+            response = requests.request(**request_opts)
             # Raise an error in the event of a non 2XX response code
             response.raise_for_status()
             # Request was successful, so we store last notified time
